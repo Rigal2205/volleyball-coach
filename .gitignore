@@ -5,9 +5,9 @@
 /volleycoach-backend/.env
 
 /volleycoach-frontend/package-lock.json/
-volleycoach-frontend/package.json
-volleycoach-frontend/.env
+/volleycoach-frontend/package.json
+/volleycoach-frontend/.env
 
 # Node modules in frontend or backend
-/frontend/node_modules/
+/volleycoach-frontend/node_modules/
 /volleycoach-backend/node_modules/
