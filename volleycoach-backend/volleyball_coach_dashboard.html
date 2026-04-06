@@ -1,0 +1,660 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); color: var(--color-text-primary); }
+  .app { display: flex; height: 100vh; min-height: 600px; background: var(--color-background-tertiary); }
+  .sidebar { width: 220px; min-width: 220px; background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 20px 16px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .logo-badge { display: flex; align-items: center; gap: 8px; }
+  .logo-icon { width: 32px; height: 32px; background: #1D9E75; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 18px; height: 18px; }
+  .logo-text { font-size: 14px; font-weight: 500; }
+  .logo-sub { font-size: 11px; color: var(--color-text-secondary); }
+  .nav { padding: 8px; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--border-radius-md); cursor: pointer; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 2px; transition: all 0.15s; }
+  .nav-item:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .nav-item.active { background: #E1F5EE; color: #0F6E56; font-weight: 500; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-badge { margin-left: auto; background: #1D9E75; color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; }
+  .coach-info { padding: 12px 16px; border-top: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #1D9E75; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .coach-name { font-size: 13px; font-weight: 500; }
+  .coach-role { font-size: 11px; color: var(--color-text-secondary); }
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .page-title { font-size: 16px; font-weight: 500; }
+  .page-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); transition: all 0.15s; }
+  .btn:hover { background: var(--color-background-secondary); }
+  .btn-primary { background: #1D9E75; color: white; border-color: #1D9E75; }
+  .btn-primary:hover { background: #0F6E56; border-color: #0F6E56; }
+  .btn svg { width: 14px; height: 14px; }
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; }
+  .stat-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 500; }
+  .stat-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px 18px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-title { font-size: 14px; font-weight: 500; }
+  .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .student-card { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 14px; border: 0.5px solid var(--color-border-tertiary); }
+  .student-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .student-avatar { width: 36px; height: 36px; border-radius: 50%; background: #9FE1CB; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #0F6E56; flex-shrink: 0; }
+  .student-name { font-size: 13px; font-weight: 500; }
+  .student-batch { font-size: 11px; color: var(--color-text-secondary); }
+  .student-details { font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+  .detail-row { display: flex; gap: 6px; align-items: flex-start; }
+  .detail-label { color: var(--color-text-tertiary); min-width: 52px; }
+  .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .tag-green { background: #E1F5EE; color: #0F6E56; }
+  .tag-blue { background: #E6F1FB; color: #185FA5; }
+  .tag-amber { background: #FAEEDA; color: #854F0B; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 22px; width: 420px; max-width: 92vw; border: 0.5px solid var(--color-border-tertiary); }
+  .modal h2 { font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; display: block; }
+  .form-input { width: 100%; padding: 7px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); font-size: 13px; color: var(--color-text-primary); font-family: var(--font-sans); }
+  .form-input:focus { outline: none; border-color: #1D9E75; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .sms-panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px 18px; margin-bottom: 16px; }
+  .slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 14px 0; }
+  .slot-btn { padding: 7px; text-align: center; border-radius: var(--border-radius-md); font-size: 12px; cursor: pointer; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; }
+  .slot-btn:hover { border-color: #1D9E75; color: #1D9E75; }
+  .slot-btn.selected { background: #1D9E75; color: white; border-color: #1D9E75; }
+  .parent-list { margin: 12px 0; }
+  .parent-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .parent-row:last-child { border-bottom: none; }
+  .parent-check { width: 16px; height: 16px; cursor: pointer; accent-color: #1D9E75; }
+  .parent-info { flex: 1; }
+  .parent-mob { color: var(--color-text-secondary); font-size: 12px; }
+  .sms-preview { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin: 10px 0; white-space: pre-wrap; }
+  .sms-sent-list { display: flex; flex-direction: column; gap: 8px; }
+  .sms-item { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .sms-avatar { width: 32px; height: 32px; border-radius: 50%; background: #9FE1CB; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #0F6E56; flex-shrink: 0; }
+  .sms-body { flex: 1; }
+  .sms-name { font-size: 13px; font-weight: 500; }
+  .sms-msg { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .sms-reply { font-size: 12px; color: #0F6E56; margin-top: 4px; background: #E1F5EE; padding: 5px 8px; border-radius: var(--border-radius-md); }
+  .sms-status { display: flex; gap: 6px; margin-top: 4px; }
+  .ai-typing { font-size: 11px; color: var(--color-text-tertiary); font-style: italic; }
+  .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .cal-nav { display: flex; align-items: center; gap: 8px; }
+  .cal-nav button { padding: 5px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); cursor: pointer; font-size: 13px; color: var(--color-text-primary); }
+  .cal-nav button:hover { background: var(--color-background-secondary); }
+  .cal-title { font-size: 14px; font-weight: 500; min-width: 120px; text-align: center; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day-header { text-align: center; font-size: 11px; color: var(--color-text-secondary); padding: 4px; font-weight: 500; }
+  .cal-day { min-height: 72px; border-radius: var(--border-radius-md); padding: 6px; border: 0.5px solid transparent; font-size: 12px; background: var(--color-background-secondary); }
+  .cal-day.weekend { background: #E1F5EE; border-color: #9FE1CB; }
+  .cal-day.other-month { opacity: 0.35; }
+  .cal-day-num { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .cal-day.weekend .cal-day-num { color: #0F6E56; }
+  .cal-event { background: #1D9E75; color: white; font-size: 10px; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-event.pending { background: #EF9F27; }
+  .legend { display: flex; gap: 16px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .inbox-list { display: flex; flex-direction: column; gap: 0; }
+  .inbox-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+  .inbox-item:last-child { border-bottom: none; }
+  .inbox-msg { flex: 1; }
+  .inbox-sender { font-size: 13px; font-weight: 500; }
+  .inbox-preview { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .inbox-time { font-size: 11px; color: var(--color-text-tertiary); flex-shrink: 0; }
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-top: 4px; }
+  .ai-bubble { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 14px; margin-top: 10px; border: 0.5px solid #9FE1CB; }
+  .ai-label { font-size: 11px; color: #0F6E56; font-weight: 500; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+  .ai-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.6; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #9FE1CB; border-top-color: #1D9E75; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .selected-inbox { background: #E1F5EE; border-radius: var(--border-radius-md); padding: 2px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .stats-row { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } .slot-grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10A15 15 0 0 1 8 12 15 15 0 0 1 12 2z"/><path d="M2 12h20"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">VolleyCoach</div>
+          <div class="logo-sub">Dashboard</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="goto('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="goto('students')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Students
+      </div>
+      <div class="nav-item" onclick="goto('sms')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Send SMS
+      </div>
+      <div class="nav-item" onclick="goto('inbox')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Inbox
+        <span class="nav-badge" id="inbox-count">3</span>
+      </div>
+      <div class="nav-item" onclick="goto('schedule')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </div>
+    </div>
+    <div class="coach-info">
+      <div class="avatar">RC</div>
+      <div>
+        <div class="coach-name">Rajan Coach</div>
+        <div class="coach-role">Head Coach</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title" id="page-title">Dashboard</div>
+        <div class="page-sub" id="page-sub">Welcome back, Rajan</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="goto('sms')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Broadcast SMS
+        </button>
+        <button class="btn btn-primary" onclick="openAddStudent()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Student
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="section active" id="sec-dashboard">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Total Students</div>
+            <div class="stat-val" id="stat-students">6</div>
+            <div class="stat-sub">Active roster</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Weekend Slots</div>
+            <div class="stat-val">16</div>
+            <div class="stat-sub">This weekend</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Booked</div>
+            <div class="stat-val" id="stat-booked">4</div>
+            <div class="stat-sub" style="color:#1D9E75;">Confirmed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pending Replies</div>
+            <div class="stat-val" id="stat-pending">3</div>
+            <div class="stat-sub" style="color:#EF9F27;">Awaiting AI</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Activity</div>
+            </div>
+            <div style="font-size:13px;line-height:1.9;color:var(--color-text-secondary);">
+              <div>✅ <b style="color:var(--color-text-primary);">Priya's parent</b> booked Sat 10am</div>
+              <div>💬 <b style="color:var(--color-text-primary);">Arjun's parent</b> asked about Sun slots</div>
+              <div>✅ <b style="color:var(--color-text-primary);">Meera's parent</b> booked Sun 2pm</div>
+              <div>📨 <b style="color:var(--color-text-primary);">SMS blast</b> sent to 6 parents</div>
+              <div>💬 <b style="color:var(--color-text-primary);">Kavya's parent</b> replied — AI responded</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">This Weekend Snapshot</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;">Saturday slots</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="tag tag-green">9am ✓ Priya</span>
+                <span class="tag tag-green">10am ✓ Arjun</span>
+                <span class="tag" style="background:#FAEEDA;color:#854F0B;">11am pending</span>
+                <span class="tag" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">12pm free</span>
+              </div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin:8px 0 4px;">Sunday slots</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="tag" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">9am free</span>
+                <span class="tag tag-green">10am ✓ Kavya</span>
+                <span class="tag tag-green">2pm ✓ Meera</span>
+                <span class="tag" style="background:#FAEEDA;color:#854F0B;">3pm pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STUDENTS -->
+      <div class="section" id="sec-students">
+        <div class="card-header" style="margin-bottom:14px;">
+          <div class="card-title">Student Roster</div>
+          <button class="btn btn-primary" onclick="openAddStudent()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Student
+          </button>
+        </div>
+        <div class="student-grid" id="student-grid"></div>
+      </div>
+
+      <!-- SMS -->
+      <div class="section" id="sec-sms">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Compose Weekend Broadcast</div></div>
+          <div class="form-group">
+            <label class="form-label">Weekend date</label>
+            <input type="date" class="form-input" id="sms-date" style="max-width:200px;" />
+          </div>
+          <div>
+            <div class="form-label" style="margin-bottom:8px;">Select time slots to offer</div>
+            <div class="slot-grid" id="slot-grid"></div>
+          </div>
+          <div style="margin-top:14px;">
+            <div class="form-label" style="margin-bottom:8px;">Select parents to notify</div>
+            <div class="parent-list" id="parent-list"></div>
+          </div>
+          <div style="margin-top:12px;">
+            <div class="form-label">Message preview</div>
+            <div class="sms-preview" id="sms-preview">Select slots and parents above to preview…</div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="sendSMS()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send SMS to selected parents
+            </button>
+          </div>
+        </div>
+        <div class="card" id="sent-log" style="display:none;">
+          <div class="card-header"><div class="card-title">Sent log</div></div>
+          <div class="sms-sent-list" id="sent-list"></div>
+        </div>
+      </div>
+
+      <!-- INBOX -->
+      <div class="section" id="sec-inbox">
+        <div class="two-col">
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-header"><div class="card-title">Parent Replies</div></div>
+            <div class="inbox-list" id="inbox-list"></div>
+          </div>
+          <div class="card" style="margin-bottom:0;" id="inbox-detail">
+            <div style="color:var(--color-text-tertiary);font-size:13px;text-align:center;padding:40px 0;">Select a message to view</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="section" id="sec-schedule">
+        <div class="card">
+          <div class="calendar-header">
+            <div class="cal-nav">
+              <button onclick="prevWeek()">&#8592;</button>
+              <div class="cal-title" id="cal-title"></div>
+              <button onclick="nextWeek()">&#8594;</button>
+            </div>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#1D9E75;"></div>Booked</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#EF9F27;"></div>Pending</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#E1F5EE;border:1px solid #9FE1CB;"></div>Weekend</div>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STUDENT MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h2>Add New Student</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Student name</label>
+        <input class="form-input" id="f-name" placeholder="Full name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input class="form-input" id="f-age" type="number" placeholder="14" min="5" max="25" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Skill level</label>
+        <select class="form-input" id="f-level">
+          <option>Beginner</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Batch / group</label>
+        <input class="form-input" id="f-batch" placeholder="e.g. Morning A" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Parent name</label>
+      <input class="form-input" id="f-parent" placeholder="Parent full name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Parent mobile number</label>
+      <input class="form-input" id="f-mobile" placeholder="+91 98765 43210" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="f-notes" placeholder="Any additional notes…" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIMES = ['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM'];
+let students = [
+  {name:'Priya Sharma',age:15,level:'Intermediate',batch:'Morning A',parent:'Sunita Sharma',mobile:'+91 98001 11111',notes:'Good serve technique'},
+  {name:'Arjun Patel',age:14,level:'Beginner',batch:'Morning A',parent:'Ramesh Patel',mobile:'+91 98002 22222',notes:'Needs footwork practice'},
+  {name:'Meera Nair',age:16,level:'Advanced',batch:'Evening B',parent:'Anita Nair',mobile:'+91 98003 33333',notes:'Team captain potential'},
+  {name:'Kavya Reddy',age:15,level:'Intermediate',batch:'Evening B',parent:'Suresh Reddy',mobile:'+91 98004 44444',notes:'Strong spiking'},
+  {name:'Rohit Singh',age:13,level:'Beginner',batch:'Morning A',parent:'Nisha Singh',mobile:'+91 98005 55555',notes:'Enthusiastic learner'},
+  {name:'Anjali Gupta',age:16,level:'Advanced',batch:'Evening B',parent:'Vikram Gupta',mobile:'+91 98006 66666',notes:'Best blocker in group'},
+];
+let selectedSlots = [];
+let selectedParents = [];
+let calOffset = 0;
+let bookings = {
+  'Sat 9:00 AM':'Priya Sharma','Sat 10:00 AM':'Arjun Patel',
+  'Sun 10:00 AM':'Kavya Reddy','Sun 2:00 PM':'Meera Nair'
+};
+let pendingSlots = {'Sat 11:00 AM':'Rohit Singh','Sun 3:00 PM':'Anjali Gupta'};
+
+let inboxMessages = [
+  {id:1,parent:'Sunita Sharma',student:'Priya Sharma',msg:'Hi, I want to book Saturday 9am for Priya',time:'2h ago',read:true,aiReply:'Great! Saturday 9:00 AM is confirmed for Priya Sharma. See you then! 🏐',status:'booked',slot:'Sat 9:00 AM'},
+  {id:2,parent:'Ramesh Patel',student:'Arjun Patel',msg:'Can Arjun come on Sunday 11am?',time:'1h ago',read:false,aiReply:null,status:'pending',slot:'Sun 11:00 AM'},
+  {id:3,parent:'Anita Nair',student:'Meera Nair',msg:'Please book Sunday 2pm for Meera',time:'45m ago',read:true,aiReply:'Sunday 2:00 PM is confirmed for Meera Nair! Looking forward to seeing her. 🏐',status:'booked',slot:'Sun 2:00 PM'},
+  {id:4,parent:'Suresh Reddy',student:'Kavya Reddy',msg:'Is Saturday 10am free for Kavya?',time:'30m ago',read:false,aiReply:null,status:'pending',slot:'Sat 10:00 AM'},
+  {id:5,parent:'Vikram Gupta',student:'Anjali Gupta',msg:'What slots are still available this Sunday?',time:'10m ago',read:false,aiReply:null,status:'pending',slot:null},
+];
+
+let selectedInbox = null;
+
+function goto(page) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const titles = {dashboard:'Dashboard',students:'Students',sms:'Send SMS',inbox:'Parent Inbox',schedule:'Schedule'};
+  const subs = {dashboard:'Welcome back, Rajan',students:'Manage your student roster',sms:'Broadcast weekend slots via SMS',inbox:'AI-assisted parent replies',schedule:'Weekend booking calendar'};
+  document.getElementById('page-title').textContent = titles[page]||page;
+  document.getElementById('page-sub').textContent = subs[page]||'';
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.textContent.trim().toLowerCase().startsWith(titles[page]?.toLowerCase().slice(0,4)||'x')) n.classList.add('active');
+  });
+  document.getElementById('sec-'+page).classList.add('active');
+  if(page==='students') renderStudents();
+  if(page==='sms') renderSMS();
+  if(page==='inbox') renderInbox();
+  if(page==='schedule') renderCalendar();
+}
+
+function openAddStudent() { document.getElementById('add-modal').classList.add('open'); }
+function closeModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+function saveStudent() {
+  const name = document.getElementById('f-name').value.trim();
+  const parent = document.getElementById('f-parent').value.trim();
+  const mobile = document.getElementById('f-mobile').value.trim();
+  if(!name||!parent||!mobile){ alert('Please fill student name, parent name and mobile.'); return; }
+  students.push({
+    name,age:document.getElementById('f-age').value||'—',
+    level:document.getElementById('f-level').value,
+    batch:document.getElementById('f-batch').value||'—',
+    parent,mobile,
+    notes:document.getElementById('f-notes').value
+  });
+  closeModal();
+  document.getElementById('stat-students').textContent = students.length;
+  renderStudents();
+  goto('students');
+}
+
+function renderStudents() {
+  const colors = ['#9FE1CB','#B5D4F4','#FAC775','#F4C0D1','#C0DD97','#CECBF6'];
+  const tc = ['#0F6E56','#185FA5','#854F0B','#993556','#3B6D11','#3C3489'];
+  const grid = document.getElementById('student-grid');
+  grid.innerHTML = students.map((s,i)=>`
+    <div class="student-card">
+      <div class="student-header">
+        <div class="student-avatar" style="background:${colors[i%colors.length]};color:${tc[i%tc.length]};">${s.name.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>
+        <div>
+          <div class="student-name">${s.name}</div>
+          <div class="student-batch">${s.batch} · Age ${s.age}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <span class="tag ${s.level==='Advanced'?'tag-green':s.level==='Intermediate'?'tag-blue':'tag-amber'}">${s.level}</span>
+      </div>
+      <div class="student-details">
+        <div class="detail-row"><span class="detail-label">Parent</span><span>${s.parent}</span></div>
+        <div class="detail-row"><span class="detail-label">Mobile</span><span>${s.mobile}</span></div>
+        ${s.notes?`<div class="detail-row"><span class="detail-label">Notes</span><span>${s.notes}</span></div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSMS() {
+  const today = new Date();
+  const saturday = new Date(today);
+  saturday.setDate(today.getDate() + (6 - today.getDay() + 7) % 7 || 7);
+  document.getElementById('sms-date').value = saturday.toISOString().split('T')[0];
+  const sg = document.getElementById('slot-grid');
+  sg.innerHTML = TIMES.map(t=>`<div class="slot-btn" onclick="toggleSlot(this,'${t}')">${t}</div>`).join('');
+  selectedSlots = []; selectedParents = [];
+  const pl = document.getElementById('parent-list');
+  pl.innerHTML = students.map((s,i)=>`
+    <div class="parent-row">
+      <input type="checkbox" class="parent-check" id="pc-${i}" onchange="toggleParent(${i})" />
+      <div class="parent-info">
+        <div style="font-size:13px;font-weight:500;">${s.parent}</div>
+        <div class="parent-mob">${s.mobile} · ${s.name}</div>
+      </div>
+    </div>
+  `).join('');
+  updatePreview();
+}
+
+function toggleSlot(el, t) {
+  el.classList.toggle('selected');
+  if(selectedSlots.includes(t)) selectedSlots = selectedSlots.filter(x=>x!==t);
+  else selectedSlots.push(t);
+  updatePreview();
+}
+
+function toggleParent(i) {
+  if(selectedParents.includes(i)) selectedParents = selectedParents.filter(x=>x!==i);
+  else selectedParents.push(i);
+  updatePreview();
+}
+
+function updatePreview() {
+  const dateVal = document.getElementById('sms-date').value;
+  const d = dateVal ? new Date(dateVal).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'}) : '[selected date]';
+  const slots = selectedSlots.length ? selectedSlots.join(', ') : '[no slots selected]';
+  document.getElementById('sms-preview').textContent =
+    `Hi! Coach Rajan here.\n\nI have free training slots on ${d}:\n${selectedSlots.map(s=>'• '+s).join('\n') || '• (no slots yet)'}\n\nReply with your preferred time to book a slot for your child. Our AI assistant will confirm availability instantly.\n\n– Coach Rajan 🏐`;
+}
+
+function sendSMS() {
+  if(!selectedSlots.length){ alert('Please select at least one time slot.'); return; }
+  if(!selectedParents.length){ alert('Please select at least one parent.'); return; }
+  const sentList = document.getElementById('sent-list');
+  const colors = ['#9FE1CB','#B5D4F4','#FAC775'];
+  const tc = ['#0F6E56','#185FA5','#854F0B'];
+  sentList.innerHTML = selectedParents.map((i,j)=>`
+    <div class="sms-item">
+      <div class="sms-avatar" style="background:${colors[j%3]};color:${tc[j%3]};">${students[i].parent.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>
+      <div class="sms-body">
+        <div class="sms-name">${students[i].parent} <span style="font-size:11px;color:var(--color-text-tertiary);">· ${students[i].mobile}</span></div>
+        <div class="sms-msg">SMS sent ✓ — Slots offered: ${selectedSlots.join(', ')}</div>
+        <div style="font-size:11px;color:#0F6E56;margin-top:3px;">Awaiting reply…</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('sent-log').style.display = 'block';
+}
+
+function renderInbox() {
+  const unread = inboxMessages.filter(m=>!m.read).length;
+  document.getElementById('inbox-count').textContent = unread;
+  const list = document.getElementById('inbox-list');
+  list.innerHTML = inboxMessages.map(m=>`
+    <div class="inbox-item ${selectedInbox===m.id?'selected-inbox':''}" onclick="viewInbox(${m.id})">
+      ${!m.read?'<div class="unread-dot"></div>':'<div style="width:8px;"></div>'}
+      <div class="inbox-msg">
+        <div class="inbox-sender">${m.parent} <span style="font-size:11px;font-weight:400;color:var(--color-text-tertiary);">· ${m.student}</span></div>
+        <div class="inbox-preview">${m.msg}</div>
+      </div>
+      <div class="inbox-time">${m.time}</div>
+    </div>
+  `).join('');
+}
+
+function viewInbox(id) {
+  selectedInbox = id;
+  const m = inboxMessages.find(x=>x.id===id);
+  m.read = true;
+  renderInbox();
+  const det = document.getElementById('inbox-detail');
+  const slotInfo = m.slot ? (bookings[m.slot] ? `<b>Slot ${m.slot} is already booked</b> by ${bookings[m.slot]}.` : (pendingSlots[m.slot] ? `Slot ${m.slot} is currently pending for ${pendingSlots[m.slot]}.` : `<b>Slot ${m.slot} is available!</b>`)) : 'Checking available slots…';
+
+  det.innerHTML = `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:500;">${m.parent}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);">${m.student} · ${m.time}</div>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:13px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px;">Parent message</div>
+      ${m.msg}
+    </div>
+    <div class="ai-bubble">
+      <div class="ai-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        AI Reply ${m.aiReply ? '(sent)' : '(generating…)'}
+      </div>
+      <div class="ai-text" id="ai-text-${id}">${m.aiReply ? m.aiReply : '<span class="spinner"></span>'}</div>
+    </div>
+    ${!m.aiReply ? '' : `<div style="margin-top:10px;display:flex;gap:8px;">
+      <span class="tag ${m.status==='booked'?'tag-green':'tag-amber'}">${m.status==='booked'?'✓ Booked':'Pending'}</span>
+      ${m.slot?`<span class="tag tag-blue">${m.slot}</span>`:''}
+    </div>`}
+  `;
+
+  if(!m.aiReply) {
+    setTimeout(()=>generateAIReply(m, slotInfo, id), 800);
+  }
+}
+
+function generateAIReply(m, slotInfo, id) {
+  const el = document.getElementById('ai-text-'+id);
+  if(!el) return;
+  let reply = '';
+  if(m.slot && !bookings[m.slot] && !pendingSlots[m.slot]) {
+    reply = `Hi ${m.parent.split(' ')[0]}! Great news — ${m.slot} is available for ${m.student}. Your slot is now confirmed! See you then 🏐`;
+    bookings[m.slot] = m.student;
+    m.status = 'booked';
+    document.getElementById('stat-booked').textContent = Object.keys(bookings).length;
+  } else if(m.slot && bookings[m.slot]) {
+    reply = `Hi ${m.parent.split(' ')[0]}, sorry — ${m.slot} is already booked. Available slots this weekend: ${TIMES.filter(t=>{
+      const sk = 'Sat '+t; const su = 'Sun '+t;
+      return (!bookings[sk]&&!pendingSlots[sk]) || (!bookings[su]&&!pendingSlots[su]);
+    }).slice(0,3).join(', ')}. Would you like one of these?`;
+  } else {
+    const available = [];
+    for(const t of TIMES){
+      if(!bookings['Sun '+t]&&!pendingSlots['Sun '+t]) available.push('Sun '+t);
+      if(!bookings['Sat '+t]&&!pendingSlots['Sat '+t]) available.push('Sat '+t);
+    }
+    reply = `Hi ${m.parent.split(' ')[0]}! This weekend's open slots are: ${available.slice(0,4).join(', ')}. Which would you prefer for ${m.student}? 🏐`;
+  }
+  m.aiReply = reply;
+  m.read = true;
+  el.textContent = reply;
+  const pending = inboxMessages.filter(x=>!x.aiReply).length;
+  document.getElementById('stat-pending').textContent = pending;
+  document.getElementById('inbox-count').textContent = inboxMessages.filter(x=>!x.read).length;
+  renderInbox();
+  const det = document.getElementById('inbox-detail');
+  const footer = `<div style="margin-top:10px;display:flex;gap:8px;">
+    <span class="tag ${m.status==='booked'?'tag-green':'tag-amber'}">${m.status==='booked'?'✓ Booked':'Pending'}</span>
+    ${m.slot?`<span class="tag tag-blue">${m.slot}</span>`:''}
+  </div>`;
+  if(!det.querySelector('.tag')) det.innerHTML += footer;
+}
+
+function renderCalendar() {
+  const today = new Date();
+  const base = new Date(today);
+  base.setDate(today.getDate() - today.getDay() + calOffset * 7);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const start = new Date(base); start.setDate(base.getDate() - base.getDay());
+  document.getElementById('cal-title').textContent = `${monthNames[start.getMonth()]} ${start.getFullYear()}`;
+  let html = days.map(d=>`<div class="cal-day-header">${d}</div>`).join('');
+  for(let i=0;i<28;i++) {
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    const isWeekend = d.getDay()===0||d.getDay()===6;
+    const isOther = d.getMonth()!==start.getMonth() && i>7;
+    const dayName = d.getDay()===6?'Sat':'Sun';
+    let events = '';
+    if(isWeekend) {
+      for(const [key,val] of Object.entries(bookings)) {
+        if(key.startsWith(dayName)) {
+          const t = key.replace(dayName+' ','');
+          events += `<div class="cal-event">${t.replace(':00','').replace(' AM','a').replace(' PM','p')} ${val.split(' ')[0]}</div>`;
+        }
+      }
+      for(const [key,val] of Object.entries(pendingSlots)) {
+        if(key.startsWith(dayName)) {
+          const t = key.replace(dayName+' ','');
+          events += `<div class="cal-event pending">${t.replace(':00','').replace(' AM','a').replace(' PM','p')} ${val.split(' ')[0]}</div>`;
+        }
+      }
+    }
+    html += `<div class="cal-day ${isWeekend?'weekend':''} ${isOther?'other-month':''}">
+      <div class="cal-day-num">${d.getDate()}</div>
+      ${events}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function prevWeek() { calOffset--; renderCalendar(); }
+function nextWeek() { calOffset++; renderCalendar(); }
+
+document.addEventListener('click', e => {
+  if(e.target === document.getElementById('add-modal')) closeModal();
+});
+
+renderStudents();
+</script>

@@ -1,0 +1,69 @@
+/* src/index.css */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green:      #1D9E75;
+  --green-lt:   #E1F5EE;
+  --green-mid:  #9FE1CB;
+  --green-dk:   #0F6E56;
+  --amber:      #EF9F27;
+  --amber-lt:   #FAEEDA;
+  --red-lt:     #FCEBEB;
+  --red:        #A32D2D;
+  --bg:         #F5F5F3;
+  --surface:    #FFFFFF;
+  --surface2:   #F1EFE8;
+  --border:     rgba(0,0,0,.1);
+  --text:       #1a1a1a;
+  --text2:      #666;
+  --text3:      #999;
+  --radius:     8px;
+  --radius-lg:  12px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px; border-radius: var(--radius);
+  font-size: 13px; border: 0.5px solid var(--border);
+  background: var(--surface); color: var(--text);
+  transition: background .15s;
+}
+.btn:hover { background: var(--surface2); }
+.btn-g { background: var(--green); color: white; border-color: var(--green); }
+.btn-g:hover { background: var(--green-dk); }
+.btn svg { width: 13px; height: 13px; }
+
+.card {
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 15px 17px; margin-bottom: 14px;
+}
+
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 500;
+}
+.tg { background: var(--green-lt); color: var(--green-dk); }
+.ta { background: var(--amber-lt); color: #854F0B; }
+.tb { background: #E6F1FB; color: #185FA5; }
+.tr { background: var(--red-lt); color: var(--red); }
+
+.fi {
+  width: 100%; padding: 7px 10px; border-radius: var(--radius);
+  border: 0.5px solid var(--border); background: var(--surface2);
+  font-size: 13px; color: var(--text);
+}
+.fi:focus { outline: none; border-color: var(--green); }
+
+.fl { font-size: 11px; color: var(--text2); margin-bottom: 4px; display: block; }
+.fg { margin-bottom: 11px; }

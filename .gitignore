@@ -1,0 +1,13 @@
+# Ignore backend private files
+/volleycoach-backend/package.json
+/volleycoach-backend/package-lock.json
+/volleycoach-backend/serviceAccountKey.json
+/volleycoach-backend/.env
+
+/volleycoach-frontend/package-lock.json/
+volleycoach-frontend/package.json
+volleycoach-frontend/.env
+
+# Node modules in frontend or backend
+/frontend/node_modules/
+/volleycoach-backend/node_modules/
